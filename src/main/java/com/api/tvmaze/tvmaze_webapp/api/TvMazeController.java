@@ -1,11 +1,9 @@
 package com.api.tvmaze.tvmaze_webapp.api;
 
+import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeShow;
 import com.api.tvmaze.tvmaze_webapp.model.response.ShowResponse;
 import com.api.tvmaze.tvmaze_webapp.service.ShowService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,6 +24,16 @@ public class TvMazeController {
             throw new IllegalArgumentException("El criterio de busqueda no puede ser vacio");
         }
         return showService.searchShows(searchQuery);
+    }
+
+    @GetMapping("/{show_id}")
+    public TvMazeShow getShowById(@PathVariable("show_id") Integer showId) {
+        /** Se valida que el id de busqueda no este vacio o menor a cero */
+        if (showId == null || showId <= 0) {
+            throw new IllegalArgumentException("El id no puede ser nulo o menor a cero");
+        }
+
+        return showService.getShowById(showId);
     }
 
 }

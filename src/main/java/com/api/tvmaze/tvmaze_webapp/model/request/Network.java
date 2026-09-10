@@ -7,4 +7,6 @@ public class Network {
 
     private Integer id;
     private String name;
+    private Country country;
+    private String officialSite;
 }

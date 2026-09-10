@@ -46,4 +46,8 @@ public class ShowService {
                     return response;
                 }).toList();
     }
+
+    public TvMazeShow getShowById(Integer showId) {
+        return tvMazeClient.getShowById(showId);
+    }
 }

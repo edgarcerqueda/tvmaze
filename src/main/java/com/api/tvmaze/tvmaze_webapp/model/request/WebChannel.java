@@ -7,4 +7,6 @@ public class WebChannel {
 
     private Integer id;
     private String name;
+    private String country;
+    private String officialSite;
 }
