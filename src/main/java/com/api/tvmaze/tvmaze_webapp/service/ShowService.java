@@ -5,6 +5,7 @@ import com.api.tvmaze.tvmaze_webapp.model.request.Comments;
 import com.api.tvmaze.tvmaze_webapp.model.request.CommentsRequest;
 import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeResponse;
 import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeShow;
+import com.api.tvmaze.tvmaze_webapp.model.response.CommentResponse;
 import com.api.tvmaze.tvmaze_webapp.model.response.ShowResponse;
 import com.api.tvmaze.tvmaze_webapp.repository.CommentsRepository;
 import com.api.tvmaze.tvmaze_webapp.repository.ShowRepository;
@@ -22,7 +23,9 @@ public class ShowService {
     private final ShowRepository showRepository;
     private final CommentsRepository commentsRepository;
 
-    /** Se inyecta la dependencia desde el constructor */
+    /**
+     * Se inyecta la dependencia desde el constructor
+     * */
     public ShowService(TvMazeClient tvMazeClient, ShowRepository showRepository, CommentsRepository commentsRepository) {
 
         this.tvMazeClient = tvMazeClient;
@@ -30,14 +33,18 @@ public class ShowService {
         this.commentsRepository = commentsRepository;
     }
 
+    /**
+     * Esta metodo sirve para buscar los shows por criterio de busqueda.
+     */
     public List<ShowResponse> searchShows(String query) {
-        /** Se obtienen los resultados desde el cliente Rest */
+        // Se obtienen los resultados desde el cliente Rest
         TvMazeResponse[] results = tvMazeClient.searchShows(query);
-        /** Se valida que no este vacio */
+        // Se valida que no este vacio
         if (results == null || results.length == 0) {
             throw new DataNotFoundException("No se encontraron resultados");
         }
-        /** Se castea a la clase ShowResponse y se devuelve en lista cada resultado */
+
+        // Se castea a la clase ShowResponse y se devuelve en lista cada resultado
         return Arrays.stream(results)
                 .map(result -> {
                     TvMazeShow show = result.getShow();
@@ -53,13 +60,17 @@ public class ShowService {
                     } else {
                         response.setChannel(null);
                     }
+                    // Se agregan los comentarios encontrados mediante la busqueda del id
+                    response.setComments(getCommentsById(show.getId()));
                     return response;
                 }).toList();
     }
 
+    /**
+     * Esta metodo busca el show por id en la BD,
+     * si no la encuentra, va a la API y la realiza el insert
+     */
     public TvMazeShow getShowById(Integer showId) {
-        /** Se realiza primero la busqueda por id a la BD,
-         * si no la encuentra va a la API y la guarda en la BD */
         return showRepository.findById(showId)
                 .orElseGet(() -> {
                     TvMazeShow show = tvMazeClient.getShowById(showId);
@@ -67,18 +78,36 @@ public class ShowService {
                 });
     }
 
+    /**
+     * Esta metodo realiza la busqueda del show por id
+     * si lo encuentra realiza el insert de los comentarios en la BD
+     */
     public void saveComments(Integer showId, CommentsRequest request){
-        /** Se realiza la busqyeda por id y
-         * se envuelve en optional para evitar nullpointer */
+        // Se envuelve en optional para evitar nullpointer
         Optional<TvMazeShow> find = showRepository.findById(showId);
 
         if(find.isPresent()){
-            /** Se crea el objeto para guardarlo en la BD */
+            // Se crea el objeto para guardarlo en la BD
             Comments review = new Comments(showId, request.getComment(), request.getRating());
             commentsRepository.save(review);
         }else{
-            throw new DataNotFoundException("No se encontro el id");
+            throw new DataNotFoundException("No se encontraron resultados");
         }
+
+    }
+
+    /**
+     * Esta metodo realiza la busqueda de los comentarios por el id del show
+     * y regresa una lista de comentarios
+     */
+    public List<CommentResponse> getCommentsById(Integer showId){
+        return commentsRepository.findByShowId(showId)
+                .stream()
+                .map(comments -> new CommentResponse(
+                        comments.getComment(),
+                        comments.getRating()
+                ))
+                .toList();
 
     }
 }

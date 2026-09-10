@@ -20,19 +20,24 @@ public class TvMazeController {
     public TvMazeController(ShowService showService) {
         this.showService = showService;
     }
-    /** API para obtener la busqueda a partir de un criterio */
+    /**
+     * API para obtener la busqueda de una lista de shows a partir de un criterio
+     */
     @GetMapping("/search")
     public List<ShowResponse> search(@RequestParam("search_query") String searchQuery) {
-        /** Se valida que el criterio de busqueda no este vacio */
+        // Se valida que el criterio de busqueda no este vacio
         if (searchQuery == null || searchQuery.trim().isEmpty()) {
             throw new IllegalArgumentException("El criterio de busqueda no puede ser vacio");
         }
         return showService.searchShows(searchQuery);
     }
 
+    /**
+     * API para realizar la busqueda de un show mediante su id
+     */
     @GetMapping("/{show_id}")
     public TvMazeShow getShowById(@PathVariable("show_id") Integer showId) {
-        /** Se valida que el id de busqueda no este vacio o menor a cero */
+        // Se valida que el id de busqueda no este vacio o menor a cero
         if (showId == null || showId <= 0) {
             throw new IllegalArgumentException("El id no puede ser nulo o menor a cero");
         }
@@ -40,10 +45,13 @@ public class TvMazeController {
         return showService.getShowById(showId);
     }
 
+    /**
+     * API para insertar un comentario y rating de un show mediante su id
+     */
     @PostMapping("/{show_id}/comments")
     public ResponseEntity<?> saveComments(@PathVariable("show_id") Integer showId,
                                           @Valid @RequestBody CommentsRequest request) {
-        /** Se valida que el id no este vacio o menor a cero */
+        // Se valida que el id no este vacio o menor a cero
         if (showId == null || showId <= 0) {
             throw new IllegalArgumentException("El id no puede ser nulo o menor a cero");
         }
