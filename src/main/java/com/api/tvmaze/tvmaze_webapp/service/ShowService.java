@@ -3,7 +3,7 @@ package com.api.tvmaze.tvmaze_webapp.service;
 import com.api.tvmaze.tvmaze_webapp.exception.DataNotFoundException;
 import com.api.tvmaze.tvmaze_webapp.model.request.Comments;
 import com.api.tvmaze.tvmaze_webapp.model.request.CommentsRequest;
-import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeResponse;
+import com.api.tvmaze.tvmaze_webapp.model.response.TvMazeResponse;
 import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeShow;
 import com.api.tvmaze.tvmaze_webapp.model.response.CommentResponse;
 import com.api.tvmaze.tvmaze_webapp.model.response.ShowResponse;
@@ -71,11 +71,13 @@ public class ShowService {
      * si no la encuentra, va a la API y la realiza el insert
      */
     public TvMazeShow getShowById(Integer showId) {
-        return showRepository.findById(showId)
+        TvMazeShow show =  showRepository.findById(showId)
                 .orElseGet(() -> {
-                    TvMazeShow show = tvMazeClient.getShowById(showId);
-                    return showRepository.save(show);
+                    TvMazeShow apiShow = tvMazeClient.getShowById(showId);
+                    return showRepository.save(apiShow);
                 });
+        show.setComments(getCommentsById(show.getId()));
+        return show;
     }
 
     /**
@@ -98,14 +100,17 @@ public class ShowService {
 
     /**
      * Esta metodo realiza la busqueda de los comentarios por el id del show
-     * y regresa una lista de comentarios
+     * y regresa una lista de comentarios, si no hay regresa una lista vacia
      */
     public List<CommentResponse> getCommentsById(Integer showId){
-        return commentsRepository.findByShowId(showId)
-                .stream()
-                .map(comments -> new CommentResponse(
-                        comments.getComment(),
-                        comments.getRating()
+        List<Comments> comments = commentsRepository.findByShowId(showId);
+        if (comments == null || comments.isEmpty()) {
+            return List.of();
+        }
+        return comments.stream()
+                .map(comment -> new CommentResponse(
+                        comment.getComment(),
+                        comment.getRating()
                 ))
                 .toList();
 

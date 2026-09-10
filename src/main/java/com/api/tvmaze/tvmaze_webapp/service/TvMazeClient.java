@@ -1,7 +1,7 @@
 package com.api.tvmaze.tvmaze_webapp.service;
 
 import com.api.tvmaze.tvmaze_webapp.exception.DataNotFoundException;
-import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeResponse;
+import com.api.tvmaze.tvmaze_webapp.model.response.TvMazeResponse;
 import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeShow;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;

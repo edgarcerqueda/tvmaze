@@ -1,5 +1,6 @@
 package com.api.tvmaze.tvmaze_webapp.model.request;
 
+import com.api.tvmaze.tvmaze_webapp.model.response.CommentResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -36,4 +37,5 @@ public class TvMazeShow {
     @JsonProperty("_links")
     private Enlaces enlaces;
     private List<String> genres;
+    private List<CommentResponse> comments;
 }
