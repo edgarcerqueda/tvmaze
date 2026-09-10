@@ -1,14 +1,18 @@
 package com.api.tvmaze.tvmaze_webapp.service;
 
 import com.api.tvmaze.tvmaze_webapp.exception.DataNotFoundException;
+import com.api.tvmaze.tvmaze_webapp.model.request.Comments;
+import com.api.tvmaze.tvmaze_webapp.model.request.CommentsRequest;
 import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeResponse;
 import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeShow;
 import com.api.tvmaze.tvmaze_webapp.model.response.ShowResponse;
+import com.api.tvmaze.tvmaze_webapp.repository.CommentsRepository;
 import com.api.tvmaze.tvmaze_webapp.repository.ShowRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -16,12 +20,14 @@ public class ShowService {
 
     private final TvMazeClient tvMazeClient;
     private final ShowRepository showRepository;
+    private final CommentsRepository commentsRepository;
 
     /** Se inyecta la dependencia desde el constructor */
-    public ShowService(TvMazeClient tvMazeClient, ShowRepository showRepository) {
+    public ShowService(TvMazeClient tvMazeClient, ShowRepository showRepository, CommentsRepository commentsRepository) {
 
         this.tvMazeClient = tvMazeClient;
         this.showRepository = showRepository;
+        this.commentsRepository = commentsRepository;
     }
 
     public List<ShowResponse> searchShows(String query) {
@@ -59,5 +65,20 @@ public class ShowService {
                     TvMazeShow show = tvMazeClient.getShowById(showId);
                     return showRepository.save(show);
                 });
+    }
+
+    public void saveComments(Integer showId, CommentsRequest request){
+        /** Se realiza la busqyeda por id y
+         * se envuelve en optional para evitar nullpointer */
+        Optional<TvMazeShow> find = showRepository.findById(showId);
+
+        if(find.isPresent()){
+            /** Se crea el objeto para guardarlo en la BD */
+            Comments review = new Comments(showId, request.getComment(), request.getRating());
+            commentsRepository.save(review);
+        }else{
+            throw new DataNotFoundException("No se encontro el id");
+        }
+
     }
 }

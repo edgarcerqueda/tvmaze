@@ -1,8 +1,12 @@
 package com.api.tvmaze.tvmaze_webapp.api;
 
+import com.api.tvmaze.tvmaze_webapp.model.request.CommentsRequest;
 import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeShow;
 import com.api.tvmaze.tvmaze_webapp.model.response.ShowResponse;
 import com.api.tvmaze.tvmaze_webapp.service.ShowService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +38,18 @@ public class TvMazeController {
         }
 
         return showService.getShowById(showId);
+    }
+
+    @PostMapping("/{show_id}/comments")
+    public ResponseEntity<?> saveComments(@PathVariable("show_id") Integer showId,
+                                          @Valid @RequestBody CommentsRequest request) {
+        /** Se valida que el id no este vacio o menor a cero */
+        if (showId == null || showId <= 0) {
+            throw new IllegalArgumentException("El id no puede ser nulo o menor a cero");
+        }
+
+        showService.saveComments(showId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 }
