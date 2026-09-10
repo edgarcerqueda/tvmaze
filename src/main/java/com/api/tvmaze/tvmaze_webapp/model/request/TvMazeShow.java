@@ -2,12 +2,16 @@ package com.api.tvmaze.tvmaze_webapp.model.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
 @Data
+@Document(collection = "shows")
 public class TvMazeShow {
 
+    @Id
     private Integer id;
     private String url;
     private String name;

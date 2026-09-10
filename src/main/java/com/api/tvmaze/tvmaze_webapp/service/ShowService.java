@@ -4,6 +4,7 @@ import com.api.tvmaze.tvmaze_webapp.exception.DataNotFoundException;
 import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeResponse;
 import com.api.tvmaze.tvmaze_webapp.model.request.TvMazeShow;
 import com.api.tvmaze.tvmaze_webapp.model.response.ShowResponse;
+import com.api.tvmaze.tvmaze_webapp.repository.ShowRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -14,10 +15,13 @@ import java.util.List;
 public class ShowService {
 
     private final TvMazeClient tvMazeClient;
+    private final ShowRepository showRepository;
 
     /** Se inyecta la dependencia desde el constructor */
-    public ShowService(TvMazeClient tvMazeClient) {
+    public ShowService(TvMazeClient tvMazeClient, ShowRepository showRepository) {
+
         this.tvMazeClient = tvMazeClient;
+        this.showRepository = showRepository;
     }
 
     public List<ShowResponse> searchShows(String query) {
@@ -48,6 +52,12 @@ public class ShowService {
     }
 
     public TvMazeShow getShowById(Integer showId) {
-        return tvMazeClient.getShowById(showId);
+        /** Se realiza primero la busqueda por id a la BD,
+         * si no la encuentra va a la API y la guarda en la BD */
+        return showRepository.findById(showId)
+                .orElseGet(() -> {
+                    TvMazeShow show = tvMazeClient.getShowById(showId);
+                    return showRepository.save(show);
+                });
     }
 }
